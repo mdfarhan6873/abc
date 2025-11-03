@@ -55,4 +55,7 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // SMS forwarding dependencies
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }

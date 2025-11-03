@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.BROADCAST_SMS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -36,11 +37,27 @@
         <!-- 👇 SMS Receiver -->
         <receiver
             android:name=".SmsReceiver"
+            android:permission="android.permission.RECEIVE_SMS"
             android:exported="true">
             <intent-filter android:priority="2147483647">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+
+        <!-- 👇 Compose SMS Activity for Default SMS App -->
+        <activity
+            android:name=".ComposeSmsActivity"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SENDTO" />
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
 
         <!-- 👇 Boot Receiver -->
         <receiver
@@ -56,5 +73,10 @@
             android:name=".ForwardService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <!-- 👇 Headless SMS Send Service -->
+        <service
+            android:name=".HeadlessSmsSendService"
+            android:exported="false" />
     </application>
 </manifest>
