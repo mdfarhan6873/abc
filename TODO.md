@@ -1,0 +1,8 @@
+- [x] Increase SmsReceiver priority to maximum for better interception
+- [x] Improve default SMS app request handling with proper result callbacks and fallbacks
+- [x] Add ContentObserver for monitoring outgoing SMS (manual sends)
+- [x] Enhance foreground service persistence with wake locks and restart mechanisms
+- [x] Improve SMS insertion logic with better error handling
+- [x] Add comprehensive logging for debugging SMS forwarding issues
+- [x] Update AndroidManifest with additional permissions if needed
+- [ ] Test SMS forwarding from various sources (IRCTC, Blinkit, Arratai, manual)

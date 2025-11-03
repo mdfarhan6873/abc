@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/images/echallan.jpeg",
+      "sha1": "66b7f3ffe943be78e15413b6be3c29af40f10291"
+    },
+    {
+      "path": "assets/images/nic.png",
+      "sha1": "c41100b5c02d848dee78f77ca34bdc17c0288010"
+    },
+    {
+      "path": "assets/images/pic.png",
+      "sha1": "7d6c0f053004931fabfa8e86904ff5fc69127df8"
+    },
+    {
+      "path": "assets/images/rto.png",
+      "sha1": "d58378cb614cb3b817cfc319c657a174dacba893"
+    }
+  ]
+}
